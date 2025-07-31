@@ -1,0 +1,222 @@
+const express = require('express');
+const { body, validationResult } = require('express-validator');
+const User = require('../models/User');
+const { auth, optionalAuth } = require('../middleware/auth');
+
+const router = express.Router();
+
+// @route   GET /api/profiles/:username
+// @desc    Get public profile by username
+// @access  Public
+router.get('/:username', optionalAuth, async (req, res) => {
+  try {
+    const { username } = req.params;
+    
+    const user = await User.findOne({ 
+      username: username.toLowerCase(),
+      'profile.isPublic': true 
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Profile not found' });
+    }
+
+    // Get public profile data
+    const profileData = user.getPublicProfile();
+    
+    // Add additional info if user is viewing their own profile
+    if (req.user && req.user._id.toString() === user._id.toString()) {
+      profileData.isOwner = true;
+      profileData.email = user.email;
+    }
+
+    res.json(profileData);
+
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   PUT /api/profiles/me
+// @desc    Update user profile
+// @access  Private
+router.put('/me', [
+  auth,
+  body('displayName').optional().isLength({ min: 1, max: 50 }),
+  body('bio').optional().isLength({ max: 500 }),
+  body('preferredGames').optional().isArray(),
+  body('platforms').optional().isArray(),
+  body('timezone').optional().isString(),
+  body('region').optional().isString(),
+  body('isPublic').optional().isBoolean()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        message: 'Validation failed', 
+        errors: errors.array() 
+      });
+    }
+
+    const {
+      displayName,
+      bio,
+      preferredGames,
+      platforms,
+      timezone,
+      region,
+      isPublic
+    } = req.body;
+
+    // Update profile fields
+    if (displayName !== undefined) req.user.profile.displayName = displayName;
+    if (bio !== undefined) req.user.profile.bio = bio;
+    if (preferredGames !== undefined) req.user.profile.preferredGames = preferredGames;
+    if (platforms !== undefined) req.user.profile.platforms = platforms;
+    if (timezone !== undefined) req.user.profile.timezone = timezone;
+    if (region !== undefined) req.user.profile.region = region;
+    if (isPublic !== undefined) req.user.profile.isPublic = isPublic;
+
+    await req.user.save();
+
+    res.json({
+      message: 'Profile updated successfully',
+      profile: req.user.profile
+    });
+
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   GET /api/profiles
+// @desc    Get all public profiles (explore page)
+// @access  Public
+router.get('/', async (req, res) => {
+  try {
+    const {
+      game,
+      platform,
+      region,
+      timezone,
+      page = 1,
+      limit = 20,
+      search
+    } = req.query;
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Build query
+    let query = { 'profile.isPublic': true };
+
+    if (game) {
+      query['profile.preferredGames'] = { $regex: game, $options: 'i' };
+    }
+
+    if (platform) {
+      query['profile.platforms'] = platform;
+    }
+
+    if (region) {
+      query['profile.region'] = { $regex: region, $options: 'i' };
+    }
+
+    if (timezone) {
+      query['profile.timezone'] = timezone;
+    }
+
+    if (search) {
+      query.$or = [
+        { username: { $regex: search, $options: 'i' } },
+        { 'profile.displayName': { $regex: search, $options: 'i' } },
+        { 'profile.preferredGames': { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const users = await User.find(query)
+      .select('username profile lastActive')
+      .sort({ lastActive: -1 })
+      .skip(skip)
+      .limit(limitNum);
+
+    const total = await User.countDocuments(query);
+
+    const profiles = users.map(user => user.getPublicProfile());
+
+    res.json({
+      profiles,
+      pagination: {
+        currentPage: pageNum,
+        totalPages: Math.ceil(total / limitNum),
+        totalProfiles: total,
+        hasNext: pageNum < Math.ceil(total / limitNum),
+        hasPrev: pageNum > 1
+      }
+    });
+
+  } catch (error) {
+    console.error('Get profiles error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   POST /api/profiles/avatar
+// @desc    Upload profile avatar
+// @access  Private
+router.post('/avatar', auth, async (req, res) => {
+  try {
+    const { avatar } = req.body;
+
+    if (!avatar) {
+      return res.status(400).json({ message: 'Avatar data required' });
+    }
+
+    // Here you would typically upload to Cloudinary or similar service
+    // For now, we'll just save the base64 data or URL
+    req.user.profile.avatar = avatar;
+    await req.user.save();
+
+    res.json({
+      message: 'Avatar updated successfully',
+      avatar: req.user.profile.avatar
+    });
+
+  } catch (error) {
+    console.error('Avatar upload error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   GET /api/profiles/check-username/:username
+// @desc    Check if username is available
+// @access  Public
+router.get('/check-username/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    
+    if (!/^[a-zA-Z0-9_-]+$/.test(username) || username.length < 3 || username.length > 30) {
+      return res.status(400).json({ 
+        available: false, 
+        message: 'Username must be 3-30 characters and contain only letters, numbers, hyphens, and underscores' 
+      });
+    }
+
+    const existingUser = await User.findOne({ username: username.toLowerCase() });
+    
+    res.json({
+      available: !existingUser,
+      message: existingUser ? 'Username is already taken' : 'Username is available'
+    });
+
+  } catch (error) {
+    console.error('Check username error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+module.exports = router;
