@@ -2,84 +2,338 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   html {
-    font-family: system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
   }
   
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-gradient-to-br from-dark-900 via-dark-800 to-gaming-900 text-white min-h-screen;
+    background-attachment: fixed;
+  }
+
+  * {
+    @apply border-dark-600;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-dark-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gaming-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gaming-500;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-gaming-600 hover:bg-gaming-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gaming-500 focus:ring-offset-2;
+    @apply bg-gradient-to-r from-gaming-600 to-neon-500 hover:from-gaming-500 hover:to-neon-400 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gaming-500 focus:ring-offset-2 focus:ring-offset-dark-800 transform hover:scale-105 hover:shadow-glow active:scale-95;
   }
   
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+    @apply bg-dark-700 hover:bg-dark-600 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-dark-500 focus:ring-offset-2 focus:ring-offset-dark-800 border border-dark-600 hover:border-dark-500 transform hover:scale-105 active:scale-95;
   }
   
   .btn-outline {
-    @apply border-2 border-gaming-600 text-gaming-600 hover:bg-gaming-600 hover:text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gaming-500 focus:ring-offset-2;
+    @apply border-2 border-gaming-600 text-gaming-400 hover:bg-gaming-600 hover:text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gaming-500 focus:ring-offset-2 focus:ring-offset-dark-800 hover:shadow-glow transform hover:scale-105 active:scale-95;
   }
   
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-gaming-500 focus:border-gaming-500;
+    @apply w-full px-4 py-3 border border-dark-600 rounded-xl shadow-sm placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-gaming-500 focus:border-gaming-500 bg-dark-800/50 backdrop-blur-sm text-white transition-all duration-300 hover:border-dark-500;
   }
   
   .card {
-    @apply bg-white rounded-lg shadow-md border border-gray-200;
+    @apply bg-dark-800/40 backdrop-blur-md rounded-2xl shadow-xl border border-dark-700/50 hover:border-dark-600/50 transition-all duration-300 hover:shadow-gaming;
+  }
+
+  .card-interactive {
+    @apply card hover:scale-[1.02] hover:shadow-glow transform transition-all duration-300;
+  }
+
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 shadow-2xl;
   }
   
   .availability-available {
-    @apply bg-green-100 border-green-300 text-green-800;
+    @apply bg-green-500/20 border-green-400/30 text-green-300 backdrop-blur-sm;
   }
   
   .availability-busy {
-    @apply bg-red-100 border-red-300 text-red-800;
+    @apply bg-red-500/20 border-red-400/30 text-red-300 backdrop-blur-sm;
   }
   
   .availability-override {
-    @apply bg-yellow-100 border-yellow-300 text-yellow-800;
+    @apply bg-yellow-500/20 border-yellow-400/30 text-yellow-300 backdrop-blur-sm;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-gaming-400 to-neon-400 bg-clip-text text-transparent;
+  }
+
+  .glow-text {
+    text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+  }
+
+  .loading-spinner {
+    @apply animate-spin rounded-full border-b-2 border-gaming-500;
+  }
+
+  .fade-in {
+    @apply animate-fade-in;
+  }
+
+  .slide-up {
+    @apply animate-fade-in-up;
+  }
+
+  .floating {
+    @apply animate-float;
+  }
+
+  .shimmer {
+    @apply bg-shimmer bg-[length:200%_100%] animate-shimmer;
+  }
+
+  /* Navigation styles */
+  .nav-link {
+    @apply text-dark-300 hover:text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 relative;
+  }
+
+  .nav-link::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-gaming-500 to-neon-500 transition-all duration-300;
+  }
+
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    @apply w-full;
+  }
+
+  /* Profile card styles */
+  .profile-card {
+    @apply card-interactive p-6 relative overflow-hidden;
+  }
+
+  .profile-card::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-gaming-600/10 to-neon-600/10 opacity-0 transition-opacity duration-300;
+  }
+
+  .profile-card:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Feature card styles */
+  .feature-card {
+    @apply glass-card p-8 text-center group hover:bg-white/10 transition-all duration-500;
+  }
+
+  .feature-icon {
+    @apply h-12 w-12 mx-auto mb-6 text-gaming-400 group-hover:text-neon-400 transition-colors duration-300 group-hover:scale-110 transform;
   }
 }
 
 .calendar-container {
-  @apply bg-white rounded-lg shadow-md p-4;
+  @apply card p-6;
 }
 
 .calendar-container .rbc-calendar {
-  font-family: inherit;
+  font-family: 'Inter', sans-serif;
+  @apply text-white;
 }
 
 .calendar-container .rbc-event {
-  @apply rounded-md border-0 text-sm font-medium;
+  @apply rounded-lg border-0 text-sm font-medium backdrop-blur-sm;
 }
 
 .calendar-container .rbc-event.available {
-  @apply bg-green-500 text-white;
+  @apply bg-green-500/80 text-white shadow-lg;
 }
 
 .calendar-container .rbc-event.busy {
-  @apply bg-red-500 text-white;
+  @apply bg-red-500/80 text-white shadow-lg;
 }
 
 .calendar-container .rbc-event.override {
-  @apply bg-yellow-500 text-black;
+  @apply bg-yellow-500/80 text-black shadow-lg;
 }
 
 .calendar-container .rbc-toolbar {
-  @apply mb-4 flex items-center justify-between;
+  @apply mb-6 flex items-center justify-between;
 }
 
 .calendar-container .rbc-btn-group button {
-  @apply px-3 py-1 text-sm border border-gray-300 bg-white hover:bg-gray-50;
+  @apply px-4 py-2 text-sm border border-dark-600 bg-dark-700 hover:bg-dark-600 text-white rounded-lg mx-1 transition-all duration-200;
 }
 
 .calendar-container .rbc-btn-group button.rbc-active {
-  @apply bg-gaming-600 text-white border-gaming-600;
+  @apply bg-gaming-600 text-white border-gaming-600 shadow-glow;
+}
+
+.calendar-container .rbc-toolbar-label {
+  @apply text-xl font-semibold text-white;
+}
+
+.calendar-container .rbc-header {
+  @apply text-dark-300 font-medium py-3 border-b border-dark-600;
+}
+
+.calendar-container .rbc-time-slot {
+  @apply border-dark-700;
+}
+
+.calendar-container .rbc-time-gutter .rbc-timeslot-group {
+  @apply border-dark-700;
+}
+
+.calendar-container .rbc-day-slot .rbc-time-slot {
+  @apply border-dark-700/50;
+}
+
+.calendar-container .rbc-today {
+  @apply bg-gaming-900/20;
+}
+
+/* Hero background animation */
+.hero-bg {
+  background: linear-gradient(-45deg, #0f172a, #1e293b, #075985, #0c4a6e);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Particle effect overlay */
+.particles-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Custom toast styles */
+.Toaster__toast {
+  @apply bg-dark-800 text-white border border-dark-600 rounded-xl backdrop-blur-md;
+}
+
+/* Loading states */
+.skeleton {
+  @apply bg-dark-700 animate-pulse rounded;
+}
+
+.skeleton-text {
+  @apply skeleton h-4 w-full mb-2;
+}
+
+.skeleton-avatar {
+  @apply skeleton h-12 w-12 rounded-full;
+}
+
+/* Responsive grid improvements */
+.grid-responsive {
+  @apply grid gap-6;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Enhanced form styles */
+.form-group {
+  @apply space-y-2;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-dark-200;
+}
+
+.form-error {
+  @apply text-red-400 text-sm mt-1;
+}
+
+.form-help {
+  @apply text-dark-400 text-sm mt-1;
+}
+
+/* Enhanced modal styles */
+.modal-overlay {
+  @apply fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4;
+}
+
+.modal-content {
+  @apply glass-card max-w-md w-full max-h-[90vh] overflow-y-auto;
+}
+
+/* Enhanced dropdown styles */
+.dropdown-menu {
+  @apply glass-card py-2 min-w-48 shadow-2xl border border-white/20;
+}
+
+.dropdown-item {
+  @apply flex items-center space-x-3 px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors duration-200 cursor-pointer;
+}
+
+/* Status indicators */
+.status-online {
+  @apply w-3 h-3 bg-green-500 rounded-full animate-pulse;
+}
+
+.status-away {
+  @apply w-3 h-3 bg-yellow-500 rounded-full;
+}
+
+.status-offline {
+  @apply w-3 h-3 bg-dark-500 rounded-full;
+}
+
+/* Gaming platform badges */
+.platform-badge {
+  @apply px-3 py-1 rounded-full text-xs font-medium bg-dark-700 text-dark-200 border border-dark-600;
+}
+
+.platform-badge.pc {
+  @apply bg-blue-500/20 text-blue-300 border-blue-500/30;
+}
+
+.platform-badge.playstation {
+  @apply bg-blue-600/20 text-blue-300 border-blue-600/30;
+}
+
+.platform-badge.xbox {
+  @apply bg-green-600/20 text-green-300 border-green-600/30;
+}
+
+.platform-badge.switch {
+  @apply bg-red-500/20 text-red-300 border-red-500/30;
+}
+
+.platform-badge.mobile {
+  @apply bg-purple-500/20 text-purple-300 border-purple-500/30;
+}
+
+/* Game preference badges */
+.game-badge {
+  @apply px-3 py-1 rounded-full text-xs font-medium bg-gaming-500/20 text-gaming-300 border border-gaming-500/30;
 }

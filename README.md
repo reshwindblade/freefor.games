@@ -62,3 +62,43 @@
 * Group scheduling (team coordination)
 * Calendar widget embed code for Discord servers or stream overlays
 * Mobile responsiveness
+
+---
+
+## 🚀 **Deployment**
+
+### Quick Development Setup
+```bash
+# Backend
+cd backend && npm install && npm run dev
+
+# Frontend (new terminal)
+cd frontend && npm install && npm start
+```
+
+### Ubuntu Server Deployment
+For production deployment on Ubuntu with Nginx:
+
+**One-line deployment:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/reshwindblade/freefor.games/main/scripts/deploy-ubuntu.sh | bash
+```
+
+**Manual deployment:**
+See [UBUNTU_DEPLOYMENT.md](UBUNTU_DEPLOYMENT.md) for detailed step-by-step instructions.
+
+**Quick production configuration:**
+```bash
+./scripts/configure-production.sh
+```
+
+### Deployment Features
+- ✅ Nginx reverse proxy configuration
+- ✅ PM2 process management  
+- ✅ SSL/HTTPS setup with Let's Encrypt
+- ✅ MongoDB security configuration
+- ✅ Automated backups and log rotation
+- ✅ Firewall configuration
+- ✅ Performance optimization
+
+---
