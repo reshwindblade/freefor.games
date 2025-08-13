@@ -95,6 +95,15 @@ else
     print_success "MongoDB is already installed"
 fi
 
+# Ensure mongosh is available for readiness checks
+if ! command -v mongosh &> /dev/null; then
+    print_step "Installing MongoDB Shell (mongosh)..."
+    brew install mongosh || brew install mongodb/brew/mongosh
+    print_success "mongosh installed successfully"
+else
+    print_success "mongosh is already installed"
+fi
+
 print_header "🗄️  Setting up MongoDB..."
 
 # Create MongoDB data directory
@@ -116,16 +125,16 @@ fi
 # Wait for MongoDB to be ready
 print_step "Waiting for MongoDB to be ready..."
 for i in {1..30}; do
-    if mongosh --eval "db.runCommand('ping').ok" --quiet > /dev/null 2>&1; then
+    if mongosh --quiet --eval "db.getSiblingDB('admin').runCommand({ ping: 1 }).ok" > /dev/null 2>&1; then
         print_success "MongoDB is ready"
         break
     fi
-    
+
     if [ $i -eq 30 ]; then
         print_error "MongoDB failed to start after 30 seconds"
         exit 1
     fi
-    
+
     sleep 1
 done
 
@@ -169,7 +178,7 @@ if [ ! -f "backend/.env" ]; then
 # Generated on $(date)
 
 # Server Configuration
-PORT=5000
+PORT=5001
 NODE_ENV=development
 
 # Database
@@ -203,7 +212,7 @@ if [ ! -f "frontend/.env.development" ]; then
     
     cat > frontend/.env.development << EOF
 # Frontend Development Configuration
-REACT_APP_API_URL=http://localhost:5000/api
+REACT_APP_API_URL=http://localhost:5001/api
 EOF
     
     print_success "Frontend .env.development file created"
@@ -216,37 +225,9 @@ print_header "🗃️  Setting up Database..."
 # Initialize database with some sample data (optional)
 print_step "Initializing development database..."
 
-# Create a simple database initialization script
-cat > init_db.js << 'EOF'
-const { MongoClient } = require('mongodb');
-
-async function initializeDatabase() {
-    const client = new MongoClient('mongodb://localhost:27017');
-    
-    try {
-        await client.connect();
-        const db = client.db('freefor_games_dev');
-        
-        // Create collections with validation
-        console.log('✅ Database initialized successfully');
-        console.log('📊 Database: freefor_games_dev');
-        console.log('📋 Collections will be created automatically when data is inserted');
-        
-    } catch (error) {
-        console.error('❌ Database initialization failed:', error.message);
-        process.exit(1);
-    } finally {
-        await client.close();
-    }
-}
-
-initializeDatabase();
-EOF
-
-# Run database initialization
+# Run database initialization using mongoose script
 cd backend
-node ../init_db.js
-rm ../init_db.js
+node scripts/init_db.js
 cd ..
 
 print_success "Database initialized"
@@ -254,12 +235,12 @@ print_success "Database initialized"
 print_header "🚀 Starting Development Servers..."
 
 # Kill any existing processes on the ports we need
-print_step "Checking for existing processes on ports 3000 and 5000..."
+print_step "Checking for existing processes on ports 3000 and 5001..."
 
-# Kill process on port 5000 (backend)
-if lsof -ti:5000 > /dev/null 2>&1; then
-    print_warning "Killing existing process on port 5000..."
-    kill -9 $(lsof -ti:5000) 2>/dev/null || true
+# Kill process on port 5001 (backend)
+if lsof -ti:5001 > /dev/null 2>&1; then
+    print_warning "Killing existing process on port 5001..."
+    kill -9 $(lsof -ti:5001) 2>/dev/null || true
 fi
 
 # Kill process on port 3000 (frontend)
@@ -291,7 +272,7 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 # Start backend server
-echo -e "${GREEN}📡 Starting Backend Server (Port 5000)...${NC}"
+echo -e "${GREEN}📡 Starting Backend Server (Port 5001)...${NC}"
 cd backend
 npm run dev &
 BACKEND_PID=$!
@@ -308,7 +289,7 @@ FRONTEND_PID=$!
 # Wait for user to stop servers
 echo -e "${BLUE}✅ Both servers are starting up...${NC}"
 echo -e "${YELLOW}📱 Frontend will open at: http://localhost:3000${NC}"
-echo -e "${YELLOW}🔗 Backend API at: http://localhost:5000${NC}"
+echo -e "${YELLOW}🔗 Backend API at: http://localhost:5001${NC}"
 echo -e "${YELLOW}🗄️  MongoDB running on: mongodb://localhost:27017${NC}"
 echo ""
 echo -e "${GREEN}Press Ctrl+C to stop all servers${NC}"

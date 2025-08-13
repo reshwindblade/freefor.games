@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { Calendar, Link as LinkIcon, Unlink, Sync, Settings } from 'lucide-react';
+import { Calendar, Link as LinkIcon, Unlink, RefreshCw, Settings } from 'lucide-react';
 
 const CalendarSettings = () => {
   const { user, updateUser } = useAuth();
@@ -17,6 +17,7 @@ const CalendarSettings = () => {
     if (user?.calendarIntegration?.googleCalendar?.connected) {
       fetchCalendars();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchCalendars = async () => {
@@ -215,7 +216,7 @@ const CalendarSettings = () => {
                     {syncing ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     ) : (
-                      <Sync className="h-4 w-4" />
+                      <RefreshCw className="h-4 w-4" />
                     )}
                     <span>Sync Selected Calendars</span>
                   </button>

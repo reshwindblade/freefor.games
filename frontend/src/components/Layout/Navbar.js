@@ -73,7 +73,7 @@ const Navbar = () => {
       variants={navVariants}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled 
-          ? 'bg-dark-900/95 backdrop-blur-md shadow-glow border-b border-gaming-600/20' 
+          ? 'bg-dark-900/95 backdrop-blur-md shadow-glow border-b border-neon-600/30' 
           : 'bg-dark-900/80 backdrop-blur-sm border-b border-dark-700/50'
       }`}
     >
@@ -87,7 +87,7 @@ const Navbar = () => {
             >
               <Link to="/" className="flex items-center space-x-3 group">
                 <div className="relative">
-                  <Gamepad2 className="h-8 w-8 text-gaming-500 group-hover:text-neon-400 transition-colors duration-300" />
+                  <Gamepad2 className="h-8 w-8 text-gaming-500 group-hover:text-neon-400 transition-colors duration-300 drop-shadow-[0_0_10px_rgba(139,92,246,0.6)]" />
                   <motion.div
                     className="absolute inset-0 rounded-full bg-gaming-500/20 group-hover:bg-neon-400/20"
                     animate={{ 
@@ -101,7 +101,7 @@ const Navbar = () => {
                     }}
                   />
                 </div>
-                <span className="font-gaming text-xl font-bold bg-gradient-to-r from-gaming-400 to-neon-400 bg-clip-text text-transparent group-hover:from-neon-400 group-hover:to-gaming-400 transition-all duration-300">
+                 <span className="font-gaming text-xl font-bold bg-gradient-to-r from-gaming-400 to-neon-400 bg-clip-text text-transparent group-hover:from-neon-400 group-hover:to-gaming-400 transition-all duration-300 drop-shadow-[0_0_12px_rgba(217,70,239,0.35)]">
                   freefor.games
                 </span>
                 <Zap className="h-4 w-4 text-neon-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />

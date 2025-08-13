@@ -1,23 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import AvailabilityCalendar from '../../components/Calendar/AvailabilityCalendar';
-import { 
-  MapPin, 
-  Clock, 
-  Gamepad2, 
-  Edit, 
-  Calendar,
-  Share,
-  ExternalLink
-} from 'lucide-react';
+import { MapPin, Clock, Gamepad2, Edit, Calendar, Share } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Profile = () => {
   const { username } = useParams();
   const { user: currentUser } = useAuth();
-  const navigate = useNavigate();
   
   const [profile, setProfile] = useState(null);
   const [availability, setAvailability] = useState([]);
@@ -30,6 +21,7 @@ const Profile = () => {
   useEffect(() => {
     fetchProfile();
     fetchAvailability();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username]);
 
   const fetchProfile = async () => {

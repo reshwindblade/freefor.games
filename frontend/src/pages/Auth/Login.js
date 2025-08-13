@@ -56,7 +56,7 @@ const Login = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-800">
                 Email address
               </label>
               <input
@@ -69,7 +69,7 @@ const Login = () => {
                 })}
                 type="email"
                 autoComplete="email"
-                className={`input-field ${errors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+                className={`input-field-light ${errors.email ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
                 placeholder="Enter your email"
               />
               {errors.email && (
@@ -78,7 +78,7 @@ const Login = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-800">
                 Password
               </label>
               <div className="relative">
@@ -88,7 +88,7 @@ const Login = () => {
                   })}
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
-                  className={`input-field pr-10 ${errors.password ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
+                  className={`input-field-light pr-10 ${errors.password ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
                   placeholder="Enter your password"
                 />
                 <button
@@ -97,9 +97,9 @@ const Login = () => {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                    <EyeOff className="h-5 w-5 text-gray-500" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <Eye className="h-5 w-5 text-gray-500" />
                   )}
                 </button>
               </div>
