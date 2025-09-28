@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../contexts/AuthContext';
-import { Eye, EyeOff, Gamepad2 } from 'lucide-react';
+import { Eye, EyeOff, Gamepad2, Mail, AlertCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [verificationError, setVerificationError] = useState(null);
 
   const {
     register,
@@ -20,15 +23,27 @@ const Login = () => {
     if (isAuthenticated) {
       navigate('/');
     }
-  }, [isAuthenticated, navigate]);
+    
+    // Show message from location state (e.g., from email verification)
+    if (location.state?.message) {
+      toast.success(location.state.message);
+    }
+  }, [isAuthenticated, navigate, location.state]);
 
   const onSubmit = async (data) => {
     setIsLoading(true);
+    setVerificationError(null);
+    
     const result = await login(data.email, data.password);
     setIsLoading(false);
     
     if (result.success) {
       navigate('/');
+    } else if (result.requiresVerification) {
+      setVerificationError({
+        message: result.error,
+        email: result.email
+      });
     }
   };
 
@@ -52,6 +67,33 @@ const Login = () => {
             </Link>
           </p>
         </div>
+
+        {/* Email Verification Error */}
+        {verificationError && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <div className="flex items-start space-x-3">
+              <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-amber-800">
+                  Email Verification Required
+                </h3>
+                <p className="text-sm text-amber-700 mt-1">
+                  {verificationError.message}
+                </p>
+                <div className="mt-3">
+                  <Link
+                    to="/resend-verification"
+                    state={{ email: verificationError.email }}
+                    className="inline-flex items-center space-x-2 text-sm bg-amber-600 text-white px-3 py-1.5 rounded hover:bg-amber-700 transition-colors"
+                  >
+                    <Mail className="h-4 w-4" />
+                    <span>Resend Verification Email</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">

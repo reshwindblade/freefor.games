@@ -2,6 +2,7 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const { auth, optionalAuth } = require('../middleware/auth');
+const { upload, deleteOldAvatar } = require('../config/cloudinary');
 
 const router = express.Router();
 
@@ -168,17 +169,19 @@ router.get('/', async (req, res) => {
 // @route   POST /api/profiles/avatar
 // @desc    Upload profile avatar
 // @access  Private
-router.post('/avatar', auth, async (req, res) => {
+router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
   try {
-    const { avatar } = req.body;
-
-    if (!avatar) {
-      return res.status(400).json({ message: 'Avatar data required' });
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file provided' });
     }
 
-    // Here you would typically upload to Cloudinary or similar service
-    // For now, we'll just save the base64 data or URL
-    req.user.profile.avatar = avatar;
+    // Delete old avatar if it exists
+    if (req.user.profile.avatar) {
+      await deleteOldAvatar(req.user.profile.avatar);
+    }
+
+    // Update user profile with new avatar URL
+    req.user.profile.avatar = req.file.path;
     await req.user.save();
 
     res.json({
@@ -188,7 +191,40 @@ router.post('/avatar', auth, async (req, res) => {
 
   } catch (error) {
     console.error('Avatar upload error:', error);
-    res.status(500).json({ message: 'Server error' });
+    
+    // Handle multer errors
+    if (error.message === 'Only image files are allowed') {
+      return res.status(400).json({ message: 'Only image files are allowed' });
+    }
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ message: 'File size too large. Maximum size is 5MB' });
+    }
+    
+    res.status(500).json({ message: 'Server error during avatar upload' });
+  }
+});
+
+// @route   DELETE /api/profiles/avatar
+// @desc    Delete profile avatar
+// @access  Private
+router.delete('/avatar', auth, async (req, res) => {
+  try {
+    // Delete avatar from Cloudinary if it exists
+    if (req.user.profile.avatar) {
+      await deleteOldAvatar(req.user.profile.avatar);
+    }
+
+    // Remove avatar from user profile
+    req.user.profile.avatar = '';
+    await req.user.save();
+
+    res.json({
+      message: 'Avatar deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Avatar deletion error:', error);
+    res.status(500).json({ message: 'Server error during avatar deletion' });
   }
 });
 

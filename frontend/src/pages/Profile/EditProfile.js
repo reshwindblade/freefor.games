@@ -5,11 +5,13 @@ import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Save, User } from 'lucide-react';
+import AvatarUpload from '../../components/Avatar/AvatarUpload';
 
 const EditProfile = () => {
   const { user, updateUser } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [currentAvatar, setCurrentAvatar] = useState(user?.profile?.avatar || '');
 
   const {
     register,
@@ -60,6 +62,18 @@ const EditProfile = () => {
     setIsLoading(false);
   };
 
+  const handleAvatarUpdate = (newAvatarUrl) => {
+    setCurrentAvatar(newAvatarUrl);
+    // Update user context with new avatar
+    updateUser({
+      ...user,
+      profile: {
+        ...user.profile,
+        avatar: newAvatarUrl
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -67,6 +81,15 @@ const EditProfile = () => {
           <div className="flex items-center space-x-3 mb-8">
             <User className="h-8 w-8 text-gaming-600" />
             <h1 className="text-3xl font-bold text-gray-900">Edit Profile</h1>
+          </div>
+
+          {/* Avatar Upload Section */}
+          <div className="mb-8">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Profile Picture</h2>
+            <AvatarUpload 
+              currentAvatar={currentAvatar}
+              onAvatarUpdate={handleAvatarUpdate}
+            />
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

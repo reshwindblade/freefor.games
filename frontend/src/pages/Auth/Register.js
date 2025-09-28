@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../contexts/AuthContext';
-import { Eye, EyeOff, Gamepad2, Check, X } from 'lucide-react';
+import { Eye, EyeOff, Gamepad2, Check, X, Mail, CheckCircle, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 
 const Register = () => {
@@ -12,6 +12,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(null);
 
   const {
     register,
@@ -55,7 +56,16 @@ const Register = () => {
     setIsLoading(false);
     
     if (result.success) {
-      navigate('/');
+      if (result.requiresVerification) {
+        // Show success message and verification instructions
+        setRegistrationSuccess({
+          email: result.user.email,
+          username: result.user.username
+        });
+      } else {
+        // Direct login (legacy path)
+        navigate('/');
+      }
     }
   };
 
@@ -66,6 +76,83 @@ const Register = () => {
   };
 
   const usernameStatus = getUsernameValidation();
+
+  // Show success screen if registration completed
+  if (registrationSuccess) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gaming-900 via-gaming-800 to-purple-900 flex items-center justify-center px-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 text-center">
+            
+            <div className="mx-auto mb-6 h-12 w-12 text-green-500">
+              <CheckCircle className="h-full w-full" />
+            </div>
+            
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Account Created! 🎉
+            </h2>
+            
+            <p className="text-gray-600 mb-6">
+              Welcome to FreeFor.Games, <strong>{registrationSuccess.username}</strong>!
+            </p>
+            
+            <div className="bg-blue-50 rounded-lg p-4 mb-6">
+              <div className="flex items-center space-x-2 mb-2">
+                <Mail className="h-5 w-5 text-blue-600" />
+                <h3 className="font-semibold text-blue-900">Check Your Email</h3>
+              </div>
+              <p className="text-sm text-blue-800">
+                We've sent a verification email to:
+              </p>
+              <p className="font-semibold text-blue-900 mt-1">
+                {registrationSuccess.email}
+              </p>
+            </div>
+            
+            <div className="space-y-4 text-left mb-6">
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 w-6 h-6 bg-gaming-100 rounded-full flex items-center justify-center text-xs font-bold text-gaming-600 mt-0.5">1</div>
+                <p className="text-sm text-gray-600">Open the email from FreeFor.Games</p>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 w-6 h-6 bg-gaming-100 rounded-full flex items-center justify-center text-xs font-bold text-gaming-600 mt-0.5">2</div>
+                <p className="text-sm text-gray-600">Click the verification link</p>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 w-6 h-6 bg-gaming-100 rounded-full flex items-center justify-center text-xs font-bold text-gaming-600 mt-0.5">3</div>
+                <p className="text-sm text-gray-600">Log in and start exploring!</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Link
+                to="/login"
+                className="btn-primary w-full flex items-center justify-center space-x-2"
+              >
+                <span>Go to Login</span>
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              
+              <Link
+                to="/resend-verification"
+                state={{ email: registrationSuccess.email }}
+                className="btn-secondary w-full"
+              >
+                Didn't get the email? Resend
+              </Link>
+            </div>
+
+            <div className="mt-6 p-4 bg-amber-50 rounded-lg">
+              <p className="text-sm text-amber-800">
+                <strong>Don't see the email?</strong><br />
+                Check your spam folder and make sure {registrationSuccess.email} is correct.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

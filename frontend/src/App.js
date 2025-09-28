@@ -6,6 +6,8 @@ import Navbar from './components/Layout/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
+import EmailVerification from './pages/Auth/EmailVerification';
+import ResendVerification from './pages/Auth/ResendVerification';
 import Profile from './pages/Profile/Profile';
 import EditProfile from './pages/Profile/EditProfile';
 import Explore from './pages/Explore';
@@ -24,6 +26,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/verify-email/:token" element={<EmailVerification />} />
+              <Route path="/resend-verification" element={<ResendVerification />} />
               <Route path="/explore" element={<Explore />} />
               <Route path="/:username" element={<Profile />} />
               

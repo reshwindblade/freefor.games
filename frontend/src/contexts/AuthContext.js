@@ -62,8 +62,16 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       const message = error.response?.data?.message || 'Login failed';
+      const requiresVerification = error.response?.data?.requiresVerification;
+      const userEmail = error.response?.data?.email;
+      
       toast.error(message);
-      return { success: false, error: message };
+      return { 
+        success: false, 
+        error: message,
+        requiresVerification,
+        email: userEmail
+      };
     }
   };
 
@@ -75,8 +83,20 @@ export const AuthProvider = ({ children }) => {
         password
       });
 
-      const { token: newToken, user: userData } = response.data;
+      const { requiresVerification, user: userData } = response.data;
       
+      // Don't auto-login if email verification is required
+      if (requiresVerification) {
+        toast.success('Account created! Please check your email to verify your account.');
+        return { 
+          success: true, 
+          requiresVerification: true,
+          user: userData
+        };
+      }
+
+      // Legacy path for already verified accounts (if any)
+      const { token: newToken } = response.data;
       localStorage.setItem('token', newToken);
       setToken(newToken);
       setUser(userData);

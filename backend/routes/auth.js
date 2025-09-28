@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
+const emailService = require('../services/emailService');
 
 const router = express.Router();
 
@@ -53,25 +54,39 @@ router.post('/register', [
       });
     }
 
+    // Generate verification token
+    const verificationToken = emailService.generateVerificationToken();
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
     // Create new user
     const user = new User({
       username,
       email,
-      password
+      password,
+      emailVerification: {
+        isVerified: false,
+        verificationToken,
+        verificationTokenExpires: verificationExpires
+      }
     });
 
     await user.save();
 
-    // Generate token
-    const token = generateToken(user._id);
+    // Send verification email
+    const emailSent = await emailService.sendVerificationEmail(user, verificationToken);
+    
+    if (!emailSent) {
+      console.warn('Failed to send verification email for user:', user.email);
+    }
 
     res.status(201).json({
-      message: 'User registered successfully',
-      token,
+      message: 'User registered successfully. Please check your email to verify your account.',
+      requiresVerification: true,
       user: {
         id: user._id,
         username: user.username,
         email: user.email,
+        emailVerified: user.emailVerification.isVerified,
         profile: user.profile
       }
     });
@@ -112,6 +127,15 @@ router.post('/login', [
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
+    // Check if email is verified
+    if (!user.emailVerification.isVerified) {
+      return res.status(403).json({ 
+        message: 'Please verify your email before logging in',
+        requiresVerification: true,
+        email: user.email
+      });
+    }
+
     // Update last active
     user.lastActive = new Date();
     await user.save();
@@ -126,6 +150,7 @@ router.post('/login', [
         id: user._id,
         username: user.username,
         email: user.email,
+        emailVerified: user.emailVerification.isVerified,
         profile: user.profile
       }
     });
@@ -146,6 +171,7 @@ router.get('/me', auth, async (req, res) => {
         id: req.user._id,
         username: req.user.username,
         email: req.user.email,
+        emailVerified: req.user.emailVerification.isVerified,
         profile: req.user.profile,
         calendarIntegration: {
           googleCalendar: {
@@ -193,6 +219,107 @@ router.put('/password', [
 
   } catch (error) {
     console.error('Password change error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @route   GET /api/auth/verify-email/:token
+// @desc    Verify email address
+// @access  Public
+router.get('/verify-email/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await User.findOne({
+      'emailVerification.verificationToken': token,
+      'emailVerification.verificationTokenExpires': { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ 
+        message: 'Invalid or expired verification token' 
+      });
+    }
+
+    if (user.emailVerification.isVerified) {
+      return res.status(400).json({ 
+        message: 'Email is already verified' 
+      });
+    }
+
+    // Mark email as verified and clear tokens
+    user.emailVerification.isVerified = true;
+    user.emailVerification.verificationToken = null;
+    user.emailVerification.verificationTokenExpires = null;
+    await user.save();
+
+    // Send welcome email
+    await emailService.sendWelcomeEmail(user);
+
+    res.json({ 
+      message: 'Email verified successfully! Welcome to FreeFor.Games!',
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        emailVerified: true,
+        profile: user.profile
+      }
+    });
+
+  } catch (error) {
+    console.error('Email verification error:', error);
+    res.status(500).json({ message: 'Server error during email verification' });
+  }
+});
+
+// @route   POST /api/auth/resend-verification
+// @desc    Resend verification email
+// @access  Public
+router.post('/resend-verification', [
+  body('email').isEmail().normalizeEmail()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        message: 'Please provide a valid email address',
+        errors: errors.array() 
+      });
+    }
+
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.emailVerification.isVerified) {
+      return res.status(400).json({ message: 'Email is already verified' });
+    }
+
+    // Generate new verification token
+    const verificationToken = emailService.generateVerificationToken();
+    const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    user.emailVerification.verificationToken = verificationToken;
+    user.emailVerification.verificationTokenExpires = verificationExpires;
+    await user.save();
+
+    // Send new verification email
+    const emailSent = await emailService.sendVerificationEmail(user, verificationToken);
+    
+    if (!emailSent) {
+      return res.status(500).json({ message: 'Failed to send verification email' });
+    }
+
+    res.json({ 
+      message: 'Verification email sent successfully. Please check your inbox.' 
+    });
+
+  } catch (error) {
+    console.error('Resend verification error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

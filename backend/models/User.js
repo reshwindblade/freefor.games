@@ -25,6 +25,20 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 6
   },
+  emailVerification: {
+    isVerified: {
+      type: Boolean,
+      default: false
+    },
+    verificationToken: {
+      type: String,
+      default: null
+    },
+    verificationTokenExpires: {
+      type: Date,
+      default: null
+    }
+  },
   profile: {
     displayName: {
       type: String,
