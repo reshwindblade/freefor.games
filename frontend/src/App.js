@@ -13,6 +13,7 @@ import EditProfile from './pages/Profile/EditProfile';
 import Explore from './pages/Explore';
 import AvailabilityEditor from './pages/Availability/AvailabilityEditor';
 import CalendarSettings from './pages/Settings/CalendarSettings';
+import Friends from './pages/Friends';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
 function App() {
@@ -45,6 +46,11 @@ function App() {
               <Route path="/settings/calendar" element={
                 <ProtectedRoute>
                   <CalendarSettings />
+                </ProtectedRoute>
+              } />
+              <Route path="/friends" element={
+                <ProtectedRoute>
+                  <Friends />
                 </ProtectedRoute>
               } />
             </Routes>

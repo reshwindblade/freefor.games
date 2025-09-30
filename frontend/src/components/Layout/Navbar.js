@@ -138,6 +138,14 @@ const Navbar = () => {
                     Calendar
                   </Link>
                 </motion.div>
+                <motion.div variants={linkVariants} whileHover="hover">
+                  <Link
+                    to="/friends"
+                    className={`nav-link ${isActivePage('/friends') ? 'active text-gaming-400' : ''}`}
+                  >
+                    Friends
+                  </Link>
+                </motion.div>
                 
                 {/* User Menu */}
                 <div className="relative group ml-4">
@@ -296,7 +304,20 @@ const Navbar = () => {
                   <motion.div
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.4 }}
+                    transition={{ delay: 0.35 }}
+                  >
+                    <Link
+                      to="/friends"
+                      className="block px-4 py-3 rounded-xl text-dark-300 hover:text-white hover:bg-dark-700/50 font-medium transition-all duration-300"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Friends
+                    </Link>
+                  </motion.div>
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.45 }}
                   >
                     <Link
                       to="/edit-profile"
@@ -323,7 +344,7 @@ const Navbar = () => {
                   <motion.div
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: 0.6 }}
+                    transition={{ delay: 0.55 }}
                   >
                     <button
                       onClick={handleLogout}

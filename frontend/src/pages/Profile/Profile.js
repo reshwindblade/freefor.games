@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import AvailabilityCalendar from '../../components/Calendar/AvailabilityCalendar';
+import FriendButton from '../../components/friends/FriendButton';
 import { MapPin, Clock, Gamepad2, Edit, Calendar, Share } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -160,7 +161,7 @@ const Profile = () => {
                 <span>Share</span>
               </button>
               
-              {isOwnProfile && (
+              {isOwnProfile ? (
                 <>
                   <Link
                     to="/edit-profile"
@@ -177,6 +178,8 @@ const Profile = () => {
                     <span>Edit Calendar</span>
                   </Link>
                 </>
+              ) : (
+                <FriendButton user={profile} />
               )}
             </div>
           </div>

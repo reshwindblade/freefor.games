@@ -10,6 +10,7 @@ const userRoutes = require('./routes/users');
 const profileRoutes = require('./routes/profiles');
 const availabilityRoutes = require('./routes/availability');
 const calendarRoutes = require('./routes/calendar');
+const friendRoutes = require('./routes/friends');
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/profiles', profileRoutes);
 app.use('/api/availability', availabilityRoutes);
 app.use('/api/calendar', calendarRoutes);
+app.use('/api/friends', friendRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
