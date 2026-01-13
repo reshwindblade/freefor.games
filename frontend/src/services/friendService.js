@@ -63,7 +63,7 @@ export const removeFriend = async (friendshipId) => {
 
 export const blockUser = async (userId) => {
   try {
-    const response = await api.post(`/friends/block/${userId}`);
+    const response = await axios.post(`/api/friends/block/${userId}`);
     toast.success('User blocked successfully');
     return {
       success: true,
@@ -82,7 +82,7 @@ export const blockUser = async (userId) => {
 
 export const unblockUser = async (userId) => {
   try {
-    const response = await api.post(`/friends/unblock/${userId}`);
+    const response = await axios.post(`/api/friends/unblock/${userId}`);
     toast.success('User unblocked successfully');
     return {
       success: true,
@@ -107,6 +107,26 @@ export const getFriends = async (status = 'accepted', page = 1, limit = 20) => {
     return { success: true, data: response.data };
   } catch (error) {
     const message = error.response?.data?.message || 'Failed to fetch friends';
+    return { success: false, error: message };
+  }
+};
+
+export const getFriendRequests = async () => {
+  try {
+    const [receivedRes, sentRes] = await Promise.all([
+      getReceivedRequests(),
+      getSentRequests()
+    ]);
+    
+    return {
+      success: true,
+      data: {
+        received: receivedRes.success ? receivedRes.data.requests || [] : [],
+        sent: sentRes.success ? sentRes.data.requests || [] : []
+      }
+    };
+  } catch (error) {
+    const message = error.response?.data?.message || 'Failed to fetch friend requests';
     return { success: false, error: message };
   }
 };
